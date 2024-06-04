@@ -16,6 +16,9 @@ const config: Config = {
       },
       fontFamily: {
         dm_sans: ['var(--font-dm_sans)', ...fontFamily.fontFamily.sans],
+      },
+      colors: {
+        white_fill: 'white'
       }
     },
   },

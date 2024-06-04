@@ -15,7 +15,10 @@ const Header = () => {
     setInterval(() => {
       if (count > 0) {
         setCount((prev) => prev - 1);
-      } else clearInterval(startPoint);
+      } else {
+        clearInterval(startPoint)
+        setCount((prev) => prev + 1800)
+      };
     }, 1000)
     
     return () => clearInterval(startPoint);
@@ -31,8 +34,8 @@ const Header = () => {
 
   return (
     <div className='w-full inline-block bg-white'>
-      <div className='w-full mx-auto container flex justify-between items-center py-4 md:py-8'>
-        <div className='flex justify-center items-center'>
+      <div className='w-full mx-auto container flex px-4 md:px-0 justify-between gap-2 md:gap-0 items-center flex-wrap md:flex-nowrap py-4 md:py-8'>
+        <div className='flex items-center w-full'>
             <Image src={'/app-logo.png'} width={63} height={62} alt='logo' />
             <div className='flex flex-col items-start ml-4'>
               <span className='md:text-xl text-lg font-medium  text-start text-[#000000]'>{appTitle}</span>

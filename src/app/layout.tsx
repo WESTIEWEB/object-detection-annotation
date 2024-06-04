@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={dm_sans.className}>
-        <main className="font-normal font-dm_sans">{children}</main>
+        <main className="font-normal h-screen font-dm_sans">{children}</main>
       </body>
     </html>
   );

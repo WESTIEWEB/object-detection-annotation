@@ -28,3 +28,12 @@ body {
     text-wrap: balance;
   }
 }
+
+.white-fill path:nth-child(2){
+  fill: white !important;
+}
+
+.rounded-ends {
+  border-top-right-radius: 9999px;
+  border-bottom-right-radius: 9999px;
+}
