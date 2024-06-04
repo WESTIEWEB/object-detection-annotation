@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, DM_Sans } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
+const dm_sans = DM_Sans({ subsets: ['latin'], weight:['400', '500', '600', '700'], style: ['normal'], variable: '--font-dm_sans'})
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -16,7 +17,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={dm_sans.className}>
+        <main className="font-normal font-dm_sans">{children}</main>
+      </body>
     </html>
   );
 }
