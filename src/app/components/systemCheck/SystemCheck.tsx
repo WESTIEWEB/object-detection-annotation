@@ -1,6 +1,6 @@
-'use server'
+'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import WebCam from '../webCam/WebCam'
 import Devices from './reusables/Devices.'
 import { Danger, LampCharge, Microphone, MonitorRecorder, TickCircle, Wifi } from 'iconsax-react'
@@ -8,6 +8,31 @@ import { IoIosCheckmark } from 'react-icons/io'
 import ReusableButton    from '../button/Button'
 
 const SystemCheck = () => {
+    const [imageCaptured, setImageCaptured] = useState(false);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [showCam, setShowCam] = useState(false);
+    const [movementDetection, setMovementDetection] = useState(false);
+
+    const handleCapture = (imageSrc: string) => {
+        setImageCaptured(true);
+        setModalIsOpen(true);
+    };
+
+    const handleProceed = () => {
+        setModalIsOpen(false);
+        setMovementDetection(true);
+    };
+
+    useEffect(() => {
+        if (movementDetection) {
+            // Mock movement detection
+            const interval = setInterval(() => {
+                console.log('Detecting movement...');
+            }, 1000);
+
+            return () => clearInterval(interval);
+        }
+    }, [movementDetection]);
 
 
   return (
@@ -22,7 +47,7 @@ const SystemCheck = () => {
             </p>
 
             <div className='my-4 flex md:flex-row gap-4 flex-col'>
-                <WebCam />
+                <WebCam onCapture={handleCapture} showCam={showCam}/>
                 <div className='flex md:w-[30%] items-start w-[70%] flex-col md:items-center gap-4 justify-center'>
                     <div className='w-full flex items-center gap-4'>
                         <Devices label='Webcam' size='h-[80px] w-[105px]' bg='bg-[#F5F3FF]' iconBg='!bg-[#755AE2]' color='!text-[#ffffff]' icon={<MonitorRecorder size={8} color='#FFFFFF' /> }>

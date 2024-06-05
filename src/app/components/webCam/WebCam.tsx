@@ -1,34 +1,51 @@
 "use client"
 
-import React, { Fragment, useCallback, useRef } from 'react'
+import React, { Fragment, PropsWithChildren, useCallback, useRef, useState } from 'react'
 import Webcam from 'react-webcam'
 
 const videoConstraints = {
-    width: 1280,
-    height: 720,
-    facingMode: "user"
-  };
+  width: 270,
+  height: 180,
+  facingMode: "user"
+};
 
+type CamProps = PropsWithChildren<{
+  onCapture: (imageSrc: string) => void;
+  showCam: boolean;
+}>
   
-  const WebCam = () => {
-      const webcamRef = useRef<undefined | any>(null)
-      
-      const capture = useCallback(
-          () => {
-              const imageSrc = webcamRef.current.getScreenshot();
-          }, [webcamRef]
-      );
+const WebCam: React.FC<CamProps> = ({ onCapture, showCam }) => {
+  const webcamRef = useRef<undefined | any>(null)
+
+  const [capturedImage, setCapturedImage] = useState(null);
+
+  const capture = useCallback(() => {
+    const imageSrc = webcamRef.current.getScreenshot();
+    if (imageSrc) {
+        localStorage.setItem('capturedImage', imageSrc);
+        setCapturedImage(imageSrc);
+        onCapture(imageSrc);
+    }
+  }, [webcamRef, onCapture]);
+
   return (
     <Fragment>
-      <Webcam
-        className='border-[1px] h-[180px] w-9/12 items-start md:w-[264px] border-[#755AE2] rounded-[10px]'
-        ref={webcamRef}
-         audio={false}
-         height={164}
-         screenshotFormat="image/jpeg"
-         width={264}
-         videoConstraints={videoConstraints}
-      />
+      <div className='border-[1px] h-[180px] w-9/12 items-start md:w-[264px] border-[#755AE2] rounded-[10px]'>
+        {
+          showCam && <Webcam
+          className='w-full h-full'
+          ref={webcamRef}
+           audio={false}
+           height={'100%'}
+           screenshotFormat="image/jpeg"
+           width={'100%'}
+           videoConstraints={videoConstraints}
+        />
+        }
+        {capturedImage && (
+                <img src={capturedImage} alt="Captured" className='mt-2' />
+            )}
+      </div>
     </Fragment>
   )
 }
