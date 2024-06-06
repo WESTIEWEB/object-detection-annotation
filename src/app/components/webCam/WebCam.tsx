@@ -30,7 +30,9 @@ const WebCam = forwardRef<WebCamHandle, CamProps>(({ onCapture, micon, mode, ima
     if( webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc) {
-        localStorage.setItem('capturedImage', imageSrc);
+        if(typeof localStorage !== undefined) {
+          localStorage.setItem('capturedImage', imageSrc);
+        }
         setCapturedImage(imageSrc);
         onCapture(imageSrc);
     }

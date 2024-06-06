@@ -16,7 +16,9 @@ const CameraCam: React.FC<CameraCamProps> = ({capturedImage, cameraRef}) => {
   }
 
   const onUserMedia = (e: any) => {
-    localStorage.setItem('catured', JSON.stringify(e))
+    if(typeof localStorage !== undefined) {
+        localStorage.setItem('catured', JSON.stringify(e))
+    }
   }
   return (
     <div className='border-[1px] h-[180px] relative w-9/12 items-start md:w-[264px] border-[#755AE2] rounded-[10px]'>
