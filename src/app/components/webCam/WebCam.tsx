@@ -1,7 +1,5 @@
-"use client"
-
-import React, { Fragment, PropsWithChildren, useCallback, useRef, useState } from 'react'
-import Webcam from 'react-webcam'
+import React, { Fragment, forwardRef, useImperativeHandle, useRef, useState, useCallback, PropsWithChildren } from 'react';
+import Webcam from 'react-webcam';
 
 const videoConstraints = {
   width: 270,
@@ -11,43 +9,82 @@ const videoConstraints = {
 
 type CamProps = PropsWithChildren<{
   onCapture: (imageSrc: string) => void;
-  showCam: boolean;
-}>
-  
-const WebCam: React.FC<CamProps> = ({ onCapture, showCam }) => {
-  const webcamRef = useRef<undefined | any>(null)
+  mode: 'capture' | 'show';
+  imageSrc?: any;
+  micon?: boolean;
+}>;
 
-  const [capturedImage, setCapturedImage] = useState(null);
+export interface WebCamHandle {
+  startCapture: () => void;
+  stopCapture: () => void;
+  capture: () => void;
+}
+
+
+const WebCam = forwardRef<WebCamHandle, CamProps>(({ onCapture, micon, mode, imageSrc }, ref)  => {
+  // const webcamRef = useRef<Webcam>(null);
+  const webcamRef = useRef<Webcam>(null);
+  const [capturedImage, setCapturedImage] = useState(imageSrc || null);
 
   const capture = useCallback(() => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    if (imageSrc) {
+    if( webcamRef.current) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      if (imageSrc) {
         localStorage.setItem('capturedImage', imageSrc);
         setCapturedImage(imageSrc);
         onCapture(imageSrc);
     }
+    }
   }, [webcamRef, onCapture]);
+
+  useImperativeHandle(ref, () => ({
+    startCapture: () => {
+      if (webcamRef.current?.video) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(stream => {
+            (webcamRef.current!.video as HTMLVideoElement).srcObject = stream;
+          })
+          .catch(err => {
+            console.error('Error accessing webcam: ', err);
+          });
+      }
+    },
+    stopCapture: () => {
+      if (webcamRef.current?.video && (webcamRef.current!.video as HTMLVideoElement).srcObject) {
+        const stream = (webcamRef.current!.video as HTMLVideoElement).srcObject as MediaStream;
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+        (webcamRef.current!.video as HTMLVideoElement).srcObject = null;
+      }
+    },
+    capture
+  }));
 
   return (
     <Fragment>
-      <div className='border-[1px] h-[180px] w-9/12 items-start md:w-[264px] border-[#755AE2] rounded-[10px]'>
-        {
-          showCam && <Webcam
-          className='w-full h-full'
-          ref={webcamRef}
-           audio={false}
-           height={'100%'}
-           screenshotFormat="image/jpeg"
-           width={'100%'}
-           videoConstraints={videoConstraints}
-        />
-        }
-        {capturedImage && (
-                <img src={capturedImage} alt="Captured" className='mt-2' />
-            )}
+      <div className='border-[1px] h-[180px] relative w-9/12 items-start md:w-[264px] border-[#755AE2] rounded-[10px]'>
+        {mode === 'capture' && (
+          <Webcam
+            className='w-full h-full object-fill rounded-[10px]'
+            ref={webcamRef}
+            audio={micon}
+            height={'100%'}
+            screenshotFormat="image/jpeg"
+            width={'100%'}
+            videoConstraints={videoConstraints}
+          />
+        )}
+        {mode === 'show' && capturedImage && (
+          <img
+            src={capturedImage}
+            style={{ objectFit: 'fill', width: '100%', height: '100%' }}
+            alt="Captured"
+            className='absolute top-0 bottom-0'
+          />
+        )}
       </div>
     </Fragment>
-  )
-}
+  );
+});
 
-export default WebCam
+export default WebCam;

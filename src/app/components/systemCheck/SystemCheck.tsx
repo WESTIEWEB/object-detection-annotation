@@ -1,29 +1,71 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import WebCam from '../webCam/WebCam'
 import Devices from './reusables/Devices.'
 import { Danger, LampCharge, Microphone, MonitorRecorder, TickCircle, Wifi } from 'iconsax-react'
 import { IoIosCheckmark } from 'react-icons/io'
 import ReusableButton    from '../button/Button'
+import ReusableModal from '../modal/modal'
+import useWindowSize from 'src/app/hooks/useWindowSIze'
+import CameraCam from '../cameraCam/CameraCam'
+import Webcam from 'react-webcam'
+import GlobalContext from '../../context/GlobalContext';
 
 const SystemCheck = () => {
     const [imageCaptured, setImageCaptured] = useState(false);
+    const [mode, setMode] = useState<'show' | 'capture' >('capture')
+    const [imageUrl, setImageUrl] = useState<undefined | null | string>(null)
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [showCam, setShowCam] = useState(false);
-    const [movementDetection, setMovementDetection] = useState(false);
 
+    const { width: screenWidth } = useWindowSize();
+    const [micOn, setMicOn] = useState<boolean>(false)
+    const cameraRef = useRef<any>(null)
+
+    //state from context
+    const { setMovementDetection, movementDetection, setIsTimerRunning, isTimerRunning } = useContext(GlobalContext);
+
+
+    const capturePhoto = () => {
+        if (cameraRef.current) {
+          cameraRef.current.capture();
+        }
+      };
+    
     const handleCapture = (imageSrc: string) => {
+        setImageUrl(imageSrc);
+        if(imageSrc) {
+            
+            setMode(mode === 'capture' ? 'show' : 'capture')
+        }
         setImageCaptured(true);
         setModalIsOpen(true);
     };
 
+
+    const handleMic = () => {
+        setMicOn((prev) => !prev)
+    }
+
+    const handleCam = () => {
+        setMode(mode === 'capture' ? 'show' : 'capture')
+    }
+
     const handleProceed = () => {
-        setModalIsOpen(false);
-        setMovementDetection(true);
+        setShowCam((prev) => !prev)
+        setIsTimerRunning((prev) => !prev)
+        setImageCaptured((prev) => !prev)
+        setMode(mode === 'capture' ? 'show' : 'capture')
+        setMovementDetection((prev) => !prev);
     };
 
+    const handleClose = (): void => {
+        setModalIsOpen((prev) => !prev)
+    }
+
     useEffect(() => {
+
         if (movementDetection) {
             // Mock movement detection
             const interval = setInterval(() => {
@@ -34,6 +76,7 @@ const SystemCheck = () => {
         }
     }, [movementDetection]);
 
+    const modalHeight = screenWidth * 0.15;
 
   return (
     <div className='md:w-[832px] my-8 mb-[10px] mx-auto w-[90%] container md:h-[523px] h-auto bg-white rounded-[20px] justify-center itemes-center p-8'>
@@ -47,10 +90,14 @@ const SystemCheck = () => {
             </p>
 
             <div className='my-4 flex md:flex-row gap-4 flex-col'>
-                <WebCam onCapture={handleCapture} showCam={showCam}/>
+                {/* {
+                    showCam ? <WebCam mode='capture' micon={micOn} onCapture={handleCapture} /> :
+                    <CameraCam cameraRef={cameraRef} capturedImage={imageUrl} />
+                } */}
+                <WebCam ref={cameraRef} onCapture={handleCapture} mode={mode} imageSrc={imageUrl} micon={micOn} />
                 <div className='flex md:w-[30%] items-start w-[70%] flex-col md:items-center gap-4 justify-center'>
                     <div className='w-full flex items-center gap-4'>
-                        <Devices label='Webcam' size='h-[80px] w-[105px]' bg='bg-[#F5F3FF]' iconBg='!bg-[#755AE2]' color='!text-[#ffffff]' icon={<MonitorRecorder size={8} color='#FFFFFF' /> }>
+                        <Devices handlePres={handleCam} label='Webcam' size='h-[80px] w-[105px]' bg='bg-[#F5F3FF]' iconBg='!bg-[#755AE2]' color='!text-[#ffffff]' icon={<MonitorRecorder size={8} color='#FFFFFF' /> }>
                             <div className='h-[40px] w-[40px] p-[2px] flex items-center justify-center rounded-full border-[3px] border-[#755AE2]'>
                                 <div className='w-full h-full flex items-center opacity-100 justify-center  bg-[#755AE2] rounded-full'>
                                     <IoIosCheckmark size={36} color='white' />
@@ -69,7 +116,7 @@ const SystemCheck = () => {
                         </Devices>
                     </div>
                     <div className='w-full flex items-center gap-4'>
-                        <Devices label='Gadget mic' size='h-[80px] w-[105px]' bg='bg-[#F5F3FF]' iconBg='!bg-[#755AE2]' color='!text-[#ffffff]' icon={<Microphone size={8} color='#FFFFFF' /> }>
+                        <Devices handlePres={handleMic} label='Gadget mic' size='h-[80px] w-[105px]' bg='bg-[#F5F3FF]' iconBg='!bg-[#755AE2]' color='!text-[#ffffff]' icon={<Microphone size={8} color='#FFFFFF' /> }>
                             <div className='h-[40px] w-[40px] p-[2px] flex items-center justify-center rounded-full border-[3px] border-[#755AE2]'>
                                 <div className='w-full h-full flex items-center opacity-100 justify-center  bg-[#755AE2] rounded-full'>
                                     <IoIosCheckmark size={36} color='white' />
@@ -90,11 +137,40 @@ const SystemCheck = () => {
                 </div>
             </div>
 
-            <ReusableButton>
+            <ReusableButton clickEvent={capturePhoto} styles='w-[207px] h-[44px]'>
                 <p className='text-[#fff] text-sm font-medium'>Take picture and continue</p>
             </ReusableButton    >
 
         </div>
+
+        
+            { imageCaptured &&  
+            <ReusableModal>
+                <div className={` rounded-[18px] bg-[#F5F3FF] mx-auto flex flex-col`} style={{ height: screenWidth > 768 ? `${modalHeight}px` : `${screenWidth * 0.7}px` , width: screenWidth > 768 ? `${screenWidth * 0.25}px`: `${screenWidth * 0.9}px` }}>
+                    <div className='w-full flex items-center rounded-tr-[18px] rounded-tl-[18px] justify-between px-4 h-[18%] bg-[#755AE2]'>
+                        <p className='text-sm md:text-base font-medium text-[#FFFFFF]'>Start assessment</p>
+                        {/* <button className='bg-[#F5F3FF33] text-xs md:text-sm font-normal'>
+                            Close
+                        </button> */}
+                        <ReusableButton clickEvent={handleClose} styles='w-[75px] bg-[#F5F3FF33] rounded-[9px] h-[32px] items-end'>
+                            <p className='text-[#FFFFFF] text-xs md:text-sm font-normal'>Close</p>
+                        </ReusableButton>
+                    </div>
+                    <div className='w-fill bg-[#F5F3FF] flex flex-col items-center justify-center h-[57%]'>
+                        <p className='text-[#755AE2] md:text-xl sm:text-base font-medium -tracking-[0.24px]'>Proceed to start assessment</p>
+                        <span className='text-[#675E8B] -tracking-[0.24px] text-center font-normal text-sm'>
+                            Kindly keep to the rules of the assessment and<br/>
+                            sit up, stay in front of your camera/webcam and start <br/> your assessment.
+                        </span>
+                    </div>
+                    <div className='bg-[#FFFFFF] rounded-[18px] flex items-center h-[25%] px-8'>
+                        <ReusableButton clickEvent={handleProceed} styles='w-[140px] h-[44px] ml-auto'>
+                            <p className='text-[#fff] md:text-sm text-xs font-normal'>Proceed</p>
+                        </ReusableButton>
+                    </div>
+                </div>
+            </ReusableModal>}
+        
     </div>
   )
 }

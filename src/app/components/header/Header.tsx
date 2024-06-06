@@ -2,7 +2,8 @@
 
 import { Eye, TimerStart } from 'iconsax-react';
 import Image from 'next/image'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
+import GlobalContext from 'src/app/context/GlobalContext';
 
 const Header = () => {
   const timerInStorage = parseInt(localStorage.getItem('count') as string)
@@ -10,20 +11,24 @@ const Header = () => {
   const [appTitle, setAppTitle] = useState<string>('Frontend Developer')
   const [testName, setTestName] = useState<string>('Skill assessment test')
 
+  const { isTimerRunning } = useContext(GlobalContext)
+
   useEffect(() => {
+
+    if (!isTimerRunning) return;
     const startPoint = 
     setInterval(() => {
       if (count > 0) {
         setCount((prev) => prev - 1);
       } else {
         clearInterval(startPoint)
-        setCount((prev) => prev + 1800)
+        alert('Your Time is Up.')
       };
     }, 1000)
     
     return () => clearInterval(startPoint);
 
-  },[count])
+  },[count, isTimerRunning])
 
   const formatCountdown = (seconds: number) => {
     localStorage.setItem('count', JSON.stringify(count))

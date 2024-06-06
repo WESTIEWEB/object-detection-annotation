@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, DM_Sans } from "next/font/google";
 import "./globals.css";
+import GlobalProvider from "./provider/GlobalProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 const dm_sans = DM_Sans({ subsets: ['latin'], weight:['400', '500', '600', '700'], style: ['normal'], variable: '--font-dm_sans'})
@@ -18,7 +19,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={dm_sans.className}>
-        <main className="font-normal h-screen font-dm_sans">{children}</main>
+        <GlobalProvider>
+          <main className="font-normal h-screen font-dm_sans">{children}</main>
+        </GlobalProvider>
       </body>
     </html>
   );
