@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import WebCam from '../webCam/WebCam'
 import Devices from './reusables/Devices.'
 import { Danger, LampCharge, Microphone, MonitorRecorder, TickCircle, Wifi } from 'iconsax-react'
-import { IoIosCheckmark } from 'react-icons/io'
+import { IoIosCheckmark, IoIosRemove } from 'react-icons/io'
 import ReusableButton    from '../button/Button'
 import ReusableModal from '../modal/modal'
 import useWindowSize from 'src/app/hooks/useWindowSIze'
@@ -28,8 +28,9 @@ const SystemCheck = () => {
 
     
     const capturePhoto = () => {
+        
         if (cameraRef.current) {
-          const imageSrc = cameraRef.current.capture();
+           const imageSrc = cameraRef.current.capture();
           if (imageSrc) {
             setCapturedImage(imageSrc);
             setImageCaptured(true);
@@ -39,10 +40,7 @@ const SystemCheck = () => {
         }
     };
 
-    const retakePhoto = () => {
-        setImageCaptured(false);
-        setMode('capture');
-    };
+    
 
 
     
@@ -114,7 +112,11 @@ const SystemCheck = () => {
                         <Devices handlePres={handleCam} label='Webcam' size='h-[80px] w-[105px]' bg='bg-[#F5F3FF]' iconBg='!bg-[#755AE2]' color='!text-[#ffffff]' icon={<MonitorRecorder size={8} color='#FFFFFF' /> }>
                             <div className='h-[40px] w-[40px] p-[2px] flex items-center justify-center rounded-full border-[3px] border-[#755AE2]'>
                                 <div className='w-full h-full flex items-center opacity-100 justify-center  bg-[#755AE2] rounded-full'>
-                                    <IoIosCheckmark size={36} color='white' />
+                                { mode !== 'show' ? (
+                                <IoIosCheckmark size={36} color='white' />
+                                ) : (
+                                <IoIosRemove size={36} color='white' />
+                                )}
                                 </div>
                               {/* <TickCircle size="32" className='white-fill' fill='#755AE2' color="#755AE2" variant="Bulk"/> */}
                             </div>
@@ -151,15 +153,9 @@ const SystemCheck = () => {
                 </div>
             </div>
 
-            {
-                imageCaptured ? 
-                <ReusableButton clickEvent={capturePhoto} styles='w-[207px] h-[44px]'>
-                    <p className='text-[#fff] text-sm font-medium'>Take picture and continue</p>
-                </ReusableButton> :
-                <ReusableButton clickEvent={retakePhoto} styles='w-[207px] h-[44px]'>
-                    <p className='text-[#fff] text-sm font-medium'>Retake picture and continue</p>
-                </ReusableButton>
-            }
+            <ReusableButton clickEvent={capturePhoto} styles='w-[207px] h-[44px]'>
+                <p className='text-[#fff] text-sm font-medium'>Take picture and continue</p>
+            </ReusableButton>
 
         </div>
 
