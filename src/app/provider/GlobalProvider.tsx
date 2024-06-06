@@ -8,8 +8,10 @@ type ProviderProps = {
 };
 
 const GlobalProvider: React.FC<ProviderProps> = ({ children }) => {
+    const [count, setCount] = useState<number>(1800)
     const [isTimerRunning, setIsTimerRunning] = useState(false);
     const [movementDetection, setMovementDetection] = useState(false);
+    const [capturedImage, setCapturedImage] = useState<string | null>('' || null);
 
     const startTimer = () => {
       setIsTimerRunning(true);
@@ -19,6 +21,10 @@ const GlobalProvider: React.FC<ProviderProps> = ({ children }) => {
     <GlobalContext.Provider
       value={{
         isTimerRunning,
+        setCount,
+        count,
+        capturedImage,
+        setCapturedImage,
         setIsTimerRunning,
         startTimer,
         movementDetection,

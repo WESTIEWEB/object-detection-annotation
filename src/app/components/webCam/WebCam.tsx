@@ -1,5 +1,6 @@
-import React, { Fragment, forwardRef, useImperativeHandle, useRef, useState, useCallback, PropsWithChildren } from 'react';
+import React, { Fragment, forwardRef, useImperativeHandle, useRef, useState, useCallback, PropsWithChildren, useContext } from 'react';
 import Webcam from 'react-webcam';
+import GlobalContext from 'src/app/context/GlobalContext';
 
 const videoConstraints = {
   width: 270,
@@ -21,18 +22,14 @@ export interface WebCamHandle {
 }
 
 
-const WebCam = forwardRef<WebCamHandle, CamProps>(({ onCapture, micon, mode, imageSrc }, ref)  => {
-  // const webcamRef = useRef<Webcam>(null);
+const WebCam = forwardRef<WebCamHandle, CamProps>(({ onCapture, micon, mode }, ref)  => {
+  const { capturedImage, setCapturedImage } = useContext(GlobalContext)
   const webcamRef = useRef<Webcam>(null);
-  const [capturedImage, setCapturedImage] = useState(imageSrc || null);
 
   const capture = useCallback(() => {
     if( webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc) {
-        if(typeof localStorage !== undefined) {
-          localStorage.setItem('capturedImage', imageSrc);
-        }
         setCapturedImage(imageSrc);
         onCapture(imageSrc);
     }
@@ -81,7 +78,7 @@ const WebCam = forwardRef<WebCamHandle, CamProps>(({ onCapture, micon, mode, ima
             src={capturedImage}
             style={{ objectFit: 'fill', width: '100%', height: '100%' }}
             alt="Captured"
-            className='absolute top-0 bottom-0'
+            className='absolute rounded-[10px] top-0 bottom-0'
           />
         )}
       </div>

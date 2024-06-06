@@ -15,7 +15,6 @@ import GlobalContext from '../../context/GlobalContext';
 const SystemCheck = () => {
     const [imageCaptured, setImageCaptured] = useState(false);
     const [mode, setMode] = useState<'show' | 'capture' >('capture')
-    const [imageUrl, setImageUrl] = useState<undefined | null | string>(null)
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [showCam, setShowCam] = useState(false);
 
@@ -24,17 +23,31 @@ const SystemCheck = () => {
     const cameraRef = useRef<any>(null)
 
     //state from context
-    const { setMovementDetection, movementDetection, setIsTimerRunning, isTimerRunning } = useContext(GlobalContext);
+    const { setMovementDetection, setCapturedImage, capturedImage, movementDetection, setIsTimerRunning, isTimerRunning } = useContext(GlobalContext);
 
 
+    
     const capturePhoto = () => {
         if (cameraRef.current) {
-          cameraRef.current.capture();
+          const imageSrc = cameraRef.current.capture();
+          if (imageSrc) {
+            setCapturedImage(imageSrc);
+            setImageCaptured(true);
+            setMode('show');
+            setModalIsOpen(true);
+          }
         }
-      };
+    };
+
+    const retakePhoto = () => {
+        setImageCaptured(false);
+        setMode('capture');
+    };
+
+
     
     const handleCapture = (imageSrc: string) => {
-        setImageUrl(imageSrc);
+        setCapturedImage(imageSrc);
         if(imageSrc) {
             
             setMode(mode === 'capture' ? 'show' : 'capture')
@@ -62,6 +75,7 @@ const SystemCheck = () => {
 
     const handleClose = (): void => {
         setModalIsOpen((prev) => !prev)
+        setImageCaptured((prev) => !prev)
     }
 
     useEffect(() => {
@@ -94,7 +108,7 @@ const SystemCheck = () => {
                     showCam ? <WebCam mode='capture' micon={micOn} onCapture={handleCapture} /> :
                     <CameraCam cameraRef={cameraRef} capturedImage={imageUrl} />
                 } */}
-                <WebCam ref={cameraRef} onCapture={handleCapture} mode={mode} imageSrc={imageUrl} micon={micOn} />
+                <WebCam ref={cameraRef} onCapture={handleCapture} mode={mode} imageSrc={capturedImage} micon={micOn} />
                 <div className='flex md:w-[30%] items-start w-[70%] flex-col md:items-center gap-4 justify-center'>
                     <div className='w-full flex items-center gap-4'>
                         <Devices handlePres={handleCam} label='Webcam' size='h-[80px] w-[105px]' bg='bg-[#F5F3FF]' iconBg='!bg-[#755AE2]' color='!text-[#ffffff]' icon={<MonitorRecorder size={8} color='#FFFFFF' /> }>
@@ -137,9 +151,15 @@ const SystemCheck = () => {
                 </div>
             </div>
 
-            <ReusableButton clickEvent={capturePhoto} styles='w-[207px] h-[44px]'>
-                <p className='text-[#fff] text-sm font-medium'>Take picture and continue</p>
-            </ReusableButton    >
+            {
+                imageCaptured ? 
+                <ReusableButton clickEvent={capturePhoto} styles='w-[207px] h-[44px]'>
+                    <p className='text-[#fff] text-sm font-medium'>Take picture and continue</p>
+                </ReusableButton> :
+                <ReusableButton clickEvent={retakePhoto} styles='w-[207px] h-[44px]'>
+                    <p className='text-[#fff] text-sm font-medium'>Retake picture and continue</p>
+                </ReusableButton>
+            }
 
         </div>
 

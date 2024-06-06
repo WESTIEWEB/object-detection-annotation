@@ -6,8 +6,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import GlobalContext from 'src/app/context/GlobalContext';
 
 const Header = () => {
-  const timerInStorage = parseInt(localStorage.getItem('count') as string)
-  const [count, setCount] = useState<number>(timerInStorage !== undefined || timerInStorage !== null ? timerInStorage : 1800)
+  const {count, setCount} = useContext(GlobalContext);
   const [appTitle, setAppTitle] = useState<string>('Frontend Developer')
   const [testName, setTestName] = useState<string>('Skill assessment test')
 
@@ -31,7 +30,6 @@ const Header = () => {
   },[count, isTimerRunning])
 
   const formatCountdown = (seconds: number) => {
-    localStorage.setItem('count', JSON.stringify(count))
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
